@@ -1,4 +1,4 @@
-use super::{AckRecord, ExternalAcks, Packet};
+use super::{LocalAckRecord, ExternalAcks, Packet};
 
 /// Contains the information about a certain 'virtual connection' over udp.
 /// This stores information about the last sequence number, dropped packages, packages waiting for acknowledgement and acknowledgements gotten from the other side.
@@ -6,7 +6,7 @@ pub struct Connection
 {
     pub seq_num: u16,
     pub dropped_packets: Vec<Packet>,
-    pub waiting_packets: AckRecord,
+    pub waiting_packets: LocalAckRecord,
     pub their_acks: ExternalAcks,
 }
 
@@ -15,7 +15,7 @@ impl Connection {
         Connection {
             seq_num: 0,
             dropped_packets: Vec::new(),
-            waiting_packets: AckRecord::new(),
+            waiting_packets: LocalAckRecord::new(),
             their_acks: ExternalAcks::new()
         }
     }
