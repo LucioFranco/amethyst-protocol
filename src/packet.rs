@@ -1,6 +1,6 @@
 use std::net::SocketAddr;
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub struct Packet {
     // the address to witch the packet will be send
     pub addr: SocketAddr,
