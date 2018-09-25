@@ -1,5 +1,9 @@
-//! Net module holds all sockets
+mod connection;
+mod packet;
+mod udp;
 
-mod reliable_udp;
+use self::connection::{Connection, ConnectionQuality };
+use self::packet::{ AckRecord, ExternalAcks };
+use Packet;
 
-pub use self::reliable_udp::UdpSocket;
+pub use self::udp::UdpSocket;
