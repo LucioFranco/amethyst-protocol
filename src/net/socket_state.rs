@@ -52,6 +52,7 @@ impl SocketState {
         let dropped_packets = connection
             .waiting_packets
             .ack(packet.ack_seq, packet.ack_field);
+
         connection.dropped_packets = dropped_packets.into_iter().map(|(_, p)| p).collect();
 
         Packet {

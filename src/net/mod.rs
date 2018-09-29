@@ -3,6 +3,7 @@ mod external_ack;
 mod local_ack;
 mod socket_state;
 mod udp;
+pub mod constants;
 
 pub use self::connection::{Connection, ConnectionQuality};
 use self::external_ack::ExternalAcks;
