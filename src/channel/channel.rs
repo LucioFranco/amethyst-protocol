@@ -5,7 +5,7 @@ use super::{Channel, ChannelType, ReliableUnorderedChannel, UnreliableChannel};
 use packet::Packet;
 use net::UdpSocket as ReliableUdp;
 
-type ChannelIml = Box<Channel + Send + Sync>;
+type ChannelImpl = Box<Channel + Send + Sync>;
 
 pub struct CommunicationChannel
 {
