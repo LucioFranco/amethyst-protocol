@@ -4,7 +4,8 @@ pub struct FragmentPakcket
     sequence: u16,
     packet_type: u8,
     fragment_id: u8,
-    num_fragment:
+    num_fragment: u8,
+
 
 //[crc32] (32 bits)
 //[sequence] (16 bits)
