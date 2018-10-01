@@ -1,5 +1,6 @@
 use std::default::Default;
 
+#[derive(Clone)]
 pub struct NetworkConfig
 {
     pub max_packet_size: usize,
