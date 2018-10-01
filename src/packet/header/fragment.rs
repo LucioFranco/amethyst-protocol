@@ -1,5 +1,6 @@
 use super::{HeaderParser, HeaderReader};
 use super::PacketHeader;
+use error::{Result, NetworkError};
 
 use std::io::{self, Cursor, Error, ErrorKind, Write};
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
@@ -25,8 +26,10 @@ impl FragmentHeader {
         if self.id == 0 {
             if self.packet_header.is_some() {
                 return self.packet_header.as_ref().unwrap().size() + 5;
+            }else {
+                error!("Attemtping to retrieve size on a 0 ID packet with no packet header");
+                0
             }
-            panic!("Attemtping to retrieve size on a 0 ID packet with no packet header");
         } else {
             5
         }
@@ -40,9 +43,9 @@ impl HeaderParser for FragmentHeader
     fn parse(&self) -> <Self as HeaderParser>::Output {
         let mut wtr = Vec::new();
         wtr.write_u8(1)?;
-        wtr.write_u16::<BigEndian>(self.sequence).unwrap();
-        wtr.write_u8(self.id).unwrap();
-        wtr.write_u8(self.num_fragments).unwrap();
+        wtr.write_u16::<BigEndian>(self.sequence)?;
+        wtr.write_u8(self.id)?;
+        wtr.write_u8(self.num_fragments)?;
 
         if self.id == 0 {
             if self.packet_header.is_some() {
@@ -58,13 +61,13 @@ impl HeaderParser for FragmentHeader
 
 impl HeaderReader for FragmentHeader
 {
-    type Header =  io::Result<FragmentHeader>;
+    type Header =  Result<FragmentHeader>;
 
     fn read(rdr: &mut Cursor<Vec<u8>>) -> <Self as HeaderReader>::Header {
         let prefix_byte = rdr.read_u8()?;
 
         if prefix_byte != 1 {
-            panic!("Not a fragment packet");
+            return Err(NetworkError::FragmentInvalid.into())
         }
 
         let sequence = rdr.read_u16::<BigEndian>()?;

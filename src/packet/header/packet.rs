@@ -37,9 +37,9 @@ impl HeaderParser for PacketHeader
 
     fn parse(&self) -> <Self as HeaderParser>::Output {
         let mut wtr = Vec::new();
-        wtr.write_u16::<BigEndian>(self.seq).unwrap();
-        wtr.write_u16::<BigEndian>(self.ack_seq).unwrap();
-        wtr.write_u32::<BigEndian>(self.ack_field).unwrap();
+        wtr.write_u16::<BigEndian>(self.seq)?;
+        wtr.write_u16::<BigEndian>(self.ack_seq)?;
+        wtr.write_u32::<BigEndian>(self.ack_field)?;
         Ok(wtr)
     }
 }

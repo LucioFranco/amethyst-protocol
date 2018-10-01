@@ -4,6 +4,7 @@ use std::net::{self, SocketAddr, ToSocketAddrs};
 use super::{SocketState, NetworkConfig};
 use packet::{header, Packet, SequenceBuffer, ReassemblyData};
 use self::header::{FragmentHeader, PacketHeader, HeaderReader};
+use error::{NetworkError, Result};
 
 pub struct UdpSocket {
     socket: net::UdpSocket,
@@ -49,27 +50,26 @@ impl UdpSocket {
             return match received_bytes {
                 Ok(Some(payload)) => return Ok(Some(Packet::new(_addr, payload))),
                 Ok(None) => return Ok(None),
-                Err(e) => return Err(e)
+                Err(e) => Err (Error::new(ErrorKind::Other, "Something whent wrong when when receiving"))
             }
         }else {
-            return Err (Error::new(ErrorKind::Other, "Failed to receive"));
+            return Err (Error::new(ErrorKind::Other, "Received bytes where of length 0"));
         }
     }
 
-    pub fn send(&mut self, mut packet: Packet) -> io::Result<usize> {
-        let (addr, mut packet_data) = self.state.pre_process_packet(packet, &self.config).unwrap();
+    pub fn send(&mut self, mut packet: Packet) -> Result<usize> {
+        let (addr, mut packet_data) = self.state.pre_process_packet(packet, &self.config)?;
 
         let mut bytes_send: usize = 0;
 
         for payload in packet_data.parts() {
             let result: io::Result<usize> = self.socket.send_to(&payload, addr);
 
-
             match result {
                 Ok(len) => {
                     bytes_send += len;
                 },
-                Err(e) => return Err(e)
+                Err(e) => return Err(NetworkError::SendFailed.into())
             }
         }
 
@@ -80,7 +80,7 @@ impl UdpSocket {
         self.socket.set_nonblocking(nonblocking)
     }
 
-    fn handle_fragment(&mut self, cursor: &mut Cursor<Vec<u8>>) -> io::Result<Option<Vec<u8>>>
+    fn handle_fragment(&mut self, cursor: &mut Cursor<Vec<u8>>) -> Result<Option<Vec<u8>>>
     {
         // read fragment packet
         let fragment_header = FragmentHeader::read(cursor)?;
@@ -89,7 +89,7 @@ impl UdpSocket {
         if !self.reassembly_buffer.exists(fragment_header.sequence) {
             if fragment_header.id == 0 {
                 if fragment_header.packet_header.is_none() {
-                    return Err(Error::new(ErrorKind::Other, "Invalid Fragment"));
+                    return Err(NetworkError::AddConnectionToManagerFailed.into());
                 }
 
                 let packet_header = fragment_header.packet_header.unwrap();
@@ -100,7 +100,7 @@ impl UdpSocket {
 
                 self.reassembly_buffer.insert(reassembly_data.clone(), fragment_header.sequence);
             } else {
-                return Err(Error::new(ErrorKind::Other, "Invalid Fragment"));
+                return Err(NetworkError::AddConnectionToManagerFailed.into());
             }
         }
 
@@ -113,16 +113,16 @@ impl UdpSocket {
             // get entry of previous received fragments
             let reassembly_data = match self.reassembly_buffer.get_mut(fragment_header.sequence) {
                 Some(val) => val,
-                None => return Err(Error::new(ErrorKind::Other, "Invalid Fragment"))
+                None => return Err(NetworkError::AddConnectionToManagerFailed.into())
             };
 
             // Got the data
             if reassembly_data.num_fragments_total != usize::from(fragment_header.num_fragments) {
-                return Err(Error::new(ErrorKind::Other, "Invalid Fragment"));
+                return Err(NetworkError::AddConnectionToManagerFailed.into());
             }
 
             if reassembly_data.fragments_received[usize::from(fragment_header.id)] {
-                return Err(Error::new(ErrorKind::Other, "Invalid Fragment"));
+                return Err(NetworkError::AddConnectionToManagerFailed.into());
             }
 
             // increase number of received fragments and set the specific fragment to received.
@@ -153,20 +153,20 @@ impl UdpSocket {
         return Ok(None);
     }
 
-    fn handle_normal_packet(&mut self, cursor: &mut Cursor<Vec<u8>>, addr: &SocketAddr) -> io::Result<Option<Vec<u8>>>
+    fn handle_normal_packet(&mut self, cursor: &mut Cursor<Vec<u8>>, addr: &SocketAddr) -> Result<Option<Vec<u8>>>
     {
         let packet_header = PacketHeader::read(cursor);
 
         match packet_header {
             Ok(header) => {
-                self.state.process_received(*addr, &header);
+                self.state.process_received(*addr, &header)?;
 
                 let mut payload = Vec::new();
                 cursor.read_to_end(&mut payload)?;
 
                 Ok(Some(payload))
             }
-            Err(e) => { return Err(e) }
+            Err(e) => {  return Err(NetworkError::HeaderParsingFailed.into());}
         }
     }
 }
