@@ -1,4 +1,5 @@
-use super::{ExternalAcks, LocalAckRecord, Packet};
+use super::{ExternalAcks, LocalAckRecord};
+use packet::Packet;
 
 /// Contains the information about a certain 'virtual connection' over udp.
 /// This stores information about the last sequence number, dropped packages, packages waiting for acknowledgement and acknowledgements gotten from the other side.

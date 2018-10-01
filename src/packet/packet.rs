@@ -2,6 +2,7 @@ use net::Connection;
 use std::net::SocketAddr;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
+/// This is a user friendly packet containing the payload from the packet and the enpoint from where it came.
 pub struct Packet {
     // the address to witch the packet will be send
     pub addr: SocketAddr,
@@ -17,10 +18,12 @@ impl Packet {
         }
     }
 
+    /// Get the payload (raw data) of this packet.
     pub fn payload(&self) -> &[u8] {
         return &self.payload;
     }
 
+    /// Get the enpoint from this packet.
     pub fn addr(&self) -> SocketAddr {
         self.addr
     }
