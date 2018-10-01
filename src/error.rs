@@ -16,5 +16,11 @@ pub enum NetworkError {
     #[fail(display = "TCP client connections hash was poisoned")]
     TcpClientConnectionsHashPoisoned,
     #[fail(display = "The lock for a specific TCP client was poisoned")]
-    TcpClientLockFailed
+    TcpClientLockFailed,
+    #[fail(display = "The fragment of an packet is invalid")]
+    FragmentInvalid,
+    #[fail(display = "The parsing of the header went wrong")]
+    HeaderParsingFailed,
+    #[fail(display = "Something went wrong when sending")]
+    SendFailed
 }

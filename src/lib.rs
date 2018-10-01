@@ -3,7 +3,7 @@
 extern crate bincode;
 extern crate failure;
 extern crate serde;
-
+extern crate byteorder;
 #[macro_use]
 extern crate serde_derive;
 #[macro_use]
@@ -18,4 +18,4 @@ pub mod error;
 pub mod events;
 
 pub use net::udp::UdpSocket;
-use packet::{Packet, RawPacket};
+
