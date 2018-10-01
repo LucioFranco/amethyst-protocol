@@ -18,11 +18,11 @@ pub struct PacketHeader
 }
 
 impl PacketHeader {
-    pub fn new(seq_num: u16, connection: &Connection) -> PacketHeader {
+    pub fn new(seq_num: u16, last_seq: u16, bit_field: u32) -> PacketHeader {
         PacketHeader {
             seq: seq_num,
-            ack_seq: connection.their_acks.last_seq,
-            ack_field: connection.their_acks.field,
+            ack_seq: last_seq,
+            ack_field: bit_field,
         }
     }
 

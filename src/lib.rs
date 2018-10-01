@@ -1,13 +1,21 @@
 //! Amethysts networking protocol
 
 extern crate bincode;
+extern crate failure;
 extern crate serde;
 extern crate byteorder;
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate failure_derive;
 
 mod net;
 mod packet;
 
-pub use net::UdpSocket;
-use packet::{Packet};
+pub mod error;
+pub mod events;
+
+pub use net::udp::UdpSocket;
+

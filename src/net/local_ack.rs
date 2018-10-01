@@ -72,7 +72,6 @@ mod test {
     use super::super::{ExternalAcks, LocalAckRecord};
     use super::Packet;
     use std::net::{IpAddr, SocketAddr};
-    use std::str;
     use std::str::FromStr;
 
     #[test]
