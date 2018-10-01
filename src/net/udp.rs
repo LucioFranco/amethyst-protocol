@@ -1,18 +1,16 @@
-use std::collections::HashMap;
 use std::io::{self, Cursor, ErrorKind, Error, Read, Write};
 use std::net::{self, SocketAddr, ToSocketAddrs};
 
 use super::{SocketState, NetworkConfig};
 use packet::{header, Packet, SequenceBuffer, ReassemblyData};
-use self::header::{FragmentHeader, PacketHeader, HeaderParser, HeaderReader};
-
-use bincode::{deserialize, serialize};
+use self::header::{FragmentHeader, PacketHeader, HeaderReader};
 
 pub struct UdpSocket {
     socket: net::UdpSocket,
     state: SocketState,
     recv_buffer: [u8;1452],
     config: NetworkConfig,
+    /// buffer for temporarily fragment storage
     reassembly_buffer: SequenceBuffer<ReassemblyData>
 }
 

@@ -3,8 +3,6 @@ use super::{HeaderParser, HeaderReader};
 use std::io::{self, Cursor};
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 
-use net::Connection;
-
 #[derive(Copy, Clone, Debug)]
 /// This is the default header.
 pub struct PacketHeader

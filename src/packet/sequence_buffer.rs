@@ -5,7 +5,6 @@ use std::clone::Clone;
 pub struct SequenceBuffer<T>  where T: Default + Clone + Send + Sync  {
     entries: Vec<T>,
     entry_sequences: Vec<u32>,
-    sequence: u16,
     size: usize,
 }
 
@@ -18,22 +17,11 @@ impl<T> SequenceBuffer<T> where T: Default + Clone + Send + Sync {
         entries.resize(size, T::default());
         entry_sequences.resize(size, 0xFFFF_FFFF);
 
-        Self {
-            sequence: 0,
+        SequenceBuffer {
             size,
             entries,
             entry_sequences,
         }
-    }
-
-    /// Get entry from collection by sequence number.
-    pub fn get(&self, sequence: u16) -> Option<&T> {
-        let index = self.index(sequence);
-        if self.entry_sequences[index] != u32::from(sequence) {
-            return None;
-        }
-
-        Some(&self.entries[index])
     }
 
     /// Get mutable entry from collection by sequence number.
@@ -77,21 +65,9 @@ impl<T> SequenceBuffer<T> where T: Default + Clone + Send + Sync {
         return true;
     }
 
-    pub fn sequence(&self) -> u16 {
-        self.sequence
-    }
-
     /// Get the lenght of the collection.
     pub fn len(&self) -> usize {
         self.entries.len()
-    }
-
-    /// Checks if the collection is empty.
-    pub fn is_empty(&self) -> bool { self.len() > 0 }
-
-    /// Get the total capacity of the collection.
-    pub fn capacity(&self) -> usize {
-        self.entries.capacity()
     }
 
     /// converts an sequence number to an index that could be used for the inner storage.

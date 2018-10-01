@@ -1,5 +1,5 @@
-use super::header::{FragmentHeader, PacketHeader, HeaderParser};
-use std::io::{Write, Result};
+use super::header::HeaderParser;
+use std::io::Result;
 
 #[derive(Clone, Debug)]
 /// This is the raw packet data that.

@@ -2,9 +2,6 @@ use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use std::thread;
 use std::time::Duration;
-use std::io;
-
-use bincode::{deserialize, serialize};
 
 use packet::{header, Packet, PacketData};
 use super::{Connection,SocketAddr, NetworkConfig};
@@ -122,6 +119,8 @@ impl SocketState {
         let dropped_packets = lock
             .waiting_packets
             .ack(packet.ack_seq, packet.ack_field);
+
+        lock.dropped_packets = dropped_packets.into_iter().map(|(_, p)| p).collect();
 
         Ok(())
     }

@@ -1,4 +1,4 @@
-use super::header::{FragmentHeader, PacketHeader, HeaderParser};
+use super::header::HeaderParser;
 use super::RawPacketData;
 
 use std::io::{Result};
