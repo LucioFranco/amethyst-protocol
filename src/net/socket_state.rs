@@ -173,8 +173,15 @@ impl SocketState {
 mod test {
     use super::SocketState;
     use net::connection::Connection;
-    use std::net::ToSocketAddrs;
+    use net::NetworkConfig;
+    use packet::{Packet, PacketData};
+    use packet::header::{FragmentHeader, PacketHeader, HeaderReader};
+
+    use std::io::Cursor;
+    use std::net::{ToSocketAddrs, SocketAddr, IpAddr};
+    use std::str::FromStr;
     use std::{thread, time};
+
     static TEST_HOST_IP: &'static str = "127.0.0.1";
     static TEST_BAD_HOST_IP: &'static str = "800.0.0.1";
     static TEST_PORT: &'static str = "20000";
@@ -198,5 +205,108 @@ mod test {
         let mut socket_state = SocketState::new();
         socket_state.check_for_timeouts();
         thread::sleep(time::Duration::from_millis(10000));
+    }
+
+    #[test]
+    pub fn construct_packet_less_than_mtu()
+    {
+        let config = NetworkConfig::default();
+
+        // - 1 so that packet can fit inside one fragment.
+        let mut data = vec![0; config.fragment_size - 1];
+
+        // do some test processing of the data.
+        let mut processed_packet = simulate_packet_processing(data.clone(), &config);
+
+        // check that there is only one fragment and that the data is right.
+        assert_eq!(processed_packet.1.fragment_count(), 1);
+        assert_eq!(processed_packet.1.parts()[0].len(), data.len() + 8); /* 8= default header size*/
+    }
+
+    #[test]
+    pub fn construct_packet_greater_than_mtu()
+    {
+        let config = NetworkConfig::default();
+
+        /// test data
+        let data = vec![0; config.fragment_size * 4];
+
+        // do some test processing of the data.
+        let mut processed_packet = simulate_packet_processing(data.clone(), &config);
+
+        // get number of fragments for this packet.
+        let remainder = if data.len() % config.fragment_size > 0 { 1 } else { 0 };
+        let num_fragments = ((data.len() / config.fragment_size) + remainder) as usize;
+
+        // check if packet is divided into fragment right
+        assert_eq!(processed_packet.1.fragment_count(), num_fragments);
+
+        // check if the first packet also contains the fragment header and packet header
+        assert_eq!(processed_packet.1.parts()[0].len(), config.fragment_size + 8 + 5); /* 8 = default header size 5 is packet header */
+    }
+
+    #[test]
+    pub fn construct_packet_and_reassemble_less_than_mtu()
+    {
+        let config = NetworkConfig::default();
+
+        // - 1 so that packet can fit inside one fragment.
+        let data = vec![0; config.fragment_size - 1];
+
+        // do some test processing of the data.
+        let mut processed_packet = simulate_packet_processing(data.clone(), &config);
+
+        // check if you can parse headers from the previous assembled packet
+        for packet_data in processed_packet.1.parts().into_iter() {
+            let mut cursor = Cursor::new(packet_data);
+            assert!(PacketHeader::read(&mut cursor).is_ok())
+        }
+    }
+
+    #[test]
+    pub fn construct_packet_and_reassemble_greater_than_mtu()
+    {
+        let config = NetworkConfig::default();
+
+        /// test data
+        let data = vec![0; config.fragment_size * 4];
+
+        // do some test processing of the data.
+        let mut processed_packet = simulate_packet_processing(data.clone(), &config);
+
+        // get number of fragments for this packet.
+        let remainder = if data.len() % config.fragment_size > 0 { 1 } else { 0 };
+        let num_fragments = ((data.len() / config.fragment_size) + remainder) as usize;
+
+        // check if you can parse headers from the previous assembled packet
+        for packet_data in processed_packet.1.parts().into_iter() {
+            let prefix = packet_data[0];
+            let mut cursor = Cursor::new(packet_data);
+
+            if prefix & 1 == 0 {
+                assert!(FragmentHeader::read(&mut cursor).is_ok())
+            }else {
+                assert!(FragmentHeader::read(&mut cursor).is_ok())
+            }
+        }
+    }
+
+    fn simulate_packet_processing(data: Vec<u8>, config: &NetworkConfig) -> (SocketAddr, PacketData)
+    {
+        // create packet with test data
+        let packet = Packet::new(get_dummy_socket_addr(), data.clone());
+
+        // process the packet
+        let mut socket_state = SocketState::new();
+        let result = socket_state.pre_process_packet(packet, &config);
+        result.unwrap()
+    }
+
+    fn get_dummy_socket_addr() -> SocketAddr
+    {
+        SocketAddr::new(
+            IpAddr::from_str("127.0.0.1").expect("Unreadable input IP."),
+            12348,
+        )
     }
 }

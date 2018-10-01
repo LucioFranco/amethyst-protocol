@@ -9,6 +9,7 @@ mod sequence_buffer;
 mod reassembly_data;
 mod packet_data;
 mod packet;
+mod tests;
 
 pub use self::reassembly_data::ReassemblyData;
 pub use self::packet_data::PacketData;

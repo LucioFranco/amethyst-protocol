@@ -2,6 +2,7 @@ mod fragment;
 mod packet;
 mod header_parser;
 mod header_reader;
+mod tests;
 
 pub use self::fragment::FragmentHeader;
 pub use self::packet::PacketHeader;

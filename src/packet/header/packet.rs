@@ -5,7 +5,7 @@ use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 
 use net::Connection;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 /// This is the default header.
 pub struct PacketHeader
 {

@@ -4,7 +4,7 @@ use super::PacketHeader;
 use std::io::{self, Cursor, Error, ErrorKind, Write};
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 /// This header represents an fragmented packet header.
 pub struct FragmentHeader {
     pub sequence: u16,
