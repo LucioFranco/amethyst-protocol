@@ -2,7 +2,7 @@ use std::io::{self, Cursor, ErrorKind, Error, Read, Write};
 use std::net::{self, SocketAddr, ToSocketAddrs};
 
 use super::{SocketState, NetworkConfig};
-use packet::{header, Packet, SequenceBuffer, ReassemblyData};
+use packet::{header, Packet, FragmentBuffer, ReassemblyData};
 use self::header::{FragmentHeader, PacketHeader, HeaderReader};
 use error::{NetworkError, Result};
 
@@ -12,7 +12,7 @@ pub struct UdpSocket {
     recv_buffer: [u8;1452],
     config: NetworkConfig,
     /// buffer for temporarily fragment storage
-    reassembly_buffer: SequenceBuffer<ReassemblyData>
+    reassembly_buffer: FragmentBuffer<ReassemblyData>
 }
 
 impl UdpSocket {
@@ -26,7 +26,7 @@ impl UdpSocket {
             socket,
             state,
             recv_buffer: [0;1452],
-            reassembly_buffer: SequenceBuffer::with_capacity(config.fragment_reassembly_buffer_size),
+            reassembly_buffer: FragmentBuffer::with_capacity(config.fragment_reassembly_buffer_size),
             config: config,
         })
     }

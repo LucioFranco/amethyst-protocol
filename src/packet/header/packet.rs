@@ -1,6 +1,5 @@
-use super::{HeaderParser, HeaderReader};
-
 use std::io::{self, Cursor};
+use super::{HeaderParser, HeaderReader};
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 
 #[derive(Copy, Clone, Debug)]

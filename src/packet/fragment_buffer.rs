@@ -2,13 +2,13 @@ use std::io::Result;
 use std::clone::Clone;
 
 /// Collection for storing data fof any kind.
-pub struct SequenceBuffer<T>  where T: Default + Clone + Send + Sync  {
+pub struct FragmentBuffer<T>  where T: Default + Clone + Send + Sync  {
     entries: Vec<T>,
     entry_sequences: Vec<u32>,
     size: usize,
 }
 
-impl<T> SequenceBuffer<T> where T: Default + Clone + Send + Sync {
+impl<T> FragmentBuffer<T> where T: Default + Clone + Send + Sync {
     /// Create collection with an specific capacity.
     pub fn with_capacity(size: usize) -> Self {
         let mut entries = Vec::with_capacity(size);
@@ -17,7 +17,7 @@ impl<T> SequenceBuffer<T> where T: Default + Clone + Send + Sync {
         entries.resize(size, T::default());
         entry_sequences.resize(size, 0xFFFF_FFFF);
 
-        SequenceBuffer {
+        FragmentBuffer {
             size,
             entries,
             entry_sequences,
