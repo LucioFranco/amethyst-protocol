@@ -1,4 +1,6 @@
-# Amethyst Protocol
+# [DEPRECATED] Amethyst Protocol
+
+This has now been moved to https://github.com/amethyst/laminar
 
 [![Build Status](https://travis-ci.org/LucioFranco/amethyst-protocol.svg?branch=master)](https://travis-ci.org/LucioFranco/amethyst-protocol)
 
